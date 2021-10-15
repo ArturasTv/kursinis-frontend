@@ -1,0 +1,10 @@
+$board-size: 800px;
+$tile-size: $board-size / 8;
+.draughtsboard {
+  display: grid;
+  grid-template-columns: repeat(8, $tile-size);
+  grid-template-rows: repeat(8, $tile-size);
+  width: $board-size;
+  height: $board-size;
+  // background-color: black;
+}

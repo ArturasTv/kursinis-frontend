@@ -1,0 +1,31 @@
+$board-size: 800px;
+$tile-size: $board-size / 8;
+$piece-size: $tile-size - 20px;
+
+.tile-white {
+  display: grid;
+  place-content: center;
+  width: $tile-size;
+  height: $tile-size;
+  background-color: rgb(255, 158, 158);
+}
+
+.tile-black {
+  display: grid;
+  place-content: center;
+  width: $tile-size;
+  height: $tile-size;
+  background-color: rgb(80, 56, 56);
+}
+
+.piece {
+  width: $tile-size;
+  height: $tile-size;
+  background-repeat: no-repeat;
+  background-position: center;
+  background-size: $piece-size;
+}
+
+.piece:hover {
+  cursor: pointer;
+}
