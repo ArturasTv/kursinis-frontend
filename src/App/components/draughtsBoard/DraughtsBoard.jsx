@@ -161,7 +161,11 @@ const DraughtsBoard = () => {
         return pieces;
       });
 
-      rules.isAnyAttacksOnBoard(pieces, "");
+      pieces.forEach((piece) => {
+        if (rules.pieceOneJumpAttacks(piece, pieces).length !== 0) {
+          console.log(rules.findJumpShots(piece, pieces));
+        }
+      });
 
       setActivePiece(null);
     }

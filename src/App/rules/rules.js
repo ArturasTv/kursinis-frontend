@@ -1,6 +1,10 @@
 import { pieceType as pType, playerType as plType } from "../constants";
 import { findDirection } from "../utills";
 export default class Rules {
+  checkBounds(x, y, m1, m2) {
+    return x + m1 <= 7 && x + m1 >= 0 && y + m2 <= 7 && y + m2 >= 0;
+  }
+
   isTileOccupied(x, y, pieces) {
     return pieces.find((piece) => piece.x === x && piece.y === y);
   }
@@ -47,15 +51,19 @@ export default class Rules {
 
     return count;
   }
-  isAnyAttacksOnBoard(pieces, playerType) {
+  pieceOneJumpAttacks(piece, pieces) {
+    const firstJumpAttacks = [];
+
     const directions = [
       [1, 1],
       [1, -1],
       [-1, -1],
       [-1, 1],
     ];
-    pieces.forEach((piece) => {
-      if (piece.playerType === plType.WHITE) {
+    const pTypesArray = [plType.WHITE, plType.BLACK];
+
+    for (let k = 0; k < pTypesArray.length; k++) {
+      if (piece.playerType === pTypesArray[k]) {
         if (piece.pieceType === pType.PAWN) {
           for (let i = 0; i < directions.length; i++) {
             if (
@@ -63,14 +71,16 @@ export default class Rules {
                 (p) =>
                   p.x === piece.x + directions[i][0] &&
                   p.y === piece.y + directions[i][1] &&
-                  p.playerType === plType.BLACK
+                  p.playerType === (k === 0 ? plType.BLACK : plType.WHITE)
               )
             ) {
               if (
-                piece.x + 2 * directions[i][0] <= 7 &&
-                piece.x + 2 * directions[i][0] >= 0 &&
-                piece.y + 2 * directions[i][1] <= 7 &&
-                piece.y + 2 * directions[i][1] >= 0
+                this.checkBounds(
+                  piece.x,
+                  piece.y,
+                  2 * directions[i][0],
+                  2 * directions[i][1]
+                )
               ) {
                 if (
                   !pieces.find(
@@ -79,7 +89,16 @@ export default class Rules {
                       p.y === piece.y + 2 * directions[i][1]
                   )
                 ) {
-                  console.log(piece);
+                  firstJumpAttacks.push([
+                    {
+                      x: piece.x + 2 * directions[i][0],
+                      y: piece.y + 2 * directions[i][1],
+                    },
+                    {
+                      x: piece.x + directions[i][0],
+                      y: piece.y + directions[i][1],
+                    },
+                  ]);
                 }
               }
             }
@@ -93,14 +112,16 @@ export default class Rules {
                   (p) =>
                     p.x === piece.x + j * directions[i][0] &&
                     p.y === piece.y + j * directions[i][1] &&
-                    p.playerType === plType.BLACK
+                    p.playerType === (k === 0 ? plType.BLACK : plType.WHITE)
                 )
               ) {
                 if (
-                  piece.x + (j + 1) * directions[i][0] <= 7 &&
-                  piece.x + (j + 1) * directions[i][0] >= 0 &&
-                  piece.y + (j + 1) * directions[i][1] <= 7 &&
-                  piece.y + (j + 1) * directions[i][1] >= 0
+                  this.checkBounds(
+                    piece.x,
+                    piece.y,
+                    (j + 1) * directions[i][0],
+                    (j + 1) * directions[i][1]
+                  )
                 ) {
                   if (
                     !pieces.find(
@@ -115,7 +136,7 @@ export default class Rules {
                         piece.y,
                         piece.x + (j + 1) * directions[i][0],
                         piece.y + (j + 1) * directions[i][1],
-                        plType.WHITE,
+                        k !== 0 ? plType.BLACK : plType.WHITE,
                         pieces
                       )
                     ) {
@@ -125,11 +146,14 @@ export default class Rules {
                           piece.y,
                           piece.x + (j + 1) * directions[i][0],
                           piece.y + (j + 1) * directions[i][1],
-                          plType.WHITE,
+                          k !== 0 ? plType.BLACK : plType.WHITE,
                           pieces
                         ) === 1
                       ) {
-                        console.log("dama", piece);
+                        firstJumpAttacks.push({
+                          x: piece.x + j * directions[i][0],
+                          y: piece.y + j * directions[i][1],
+                        });
                       }
                     }
                   }
@@ -139,91 +163,8 @@ export default class Rules {
           }
         }
       }
-      if (piece.playerType === plType.BLACK) {
-        if (piece.pieceType === pType.PAWN) {
-          for (let i = 0; i < directions.length; i++) {
-            if (
-              pieces.find(
-                (p) =>
-                  p.x === piece.x + directions[i][0] &&
-                  p.y === piece.y + directions[i][1] &&
-                  p.playerType === plType.WHITE
-              )
-            ) {
-              if (
-                piece.x + 2 * directions[i][0] <= 7 &&
-                piece.x + 2 * directions[i][0] >= 0 &&
-                piece.y + 2 * directions[i][1] <= 7 &&
-                piece.y + 2 * directions[i][1] >= 0
-              ) {
-                if (
-                  !pieces.find(
-                    (p) =>
-                      p.x === piece.x + 2 * directions[i][0] &&
-                      p.y === piece.y + 2 * directions[i][1]
-                  )
-                ) {
-                  console.log(piece);
-                }
-              }
-            }
-          }
-        }
-        if (piece.pieceType === pType.QUEEN) {
-          for (let i = 0; i < directions.length; i++) {
-            for (let j = 0; j < 8; j++) {
-              if (
-                pieces.find(
-                  (p) =>
-                    p.x === piece.x + j * directions[i][0] &&
-                    p.y === piece.y + j * directions[i][1] &&
-                    p.playerType === plType.WHITE
-                )
-              ) {
-                if (
-                  piece.x + (j + 1) * directions[i][0] <= 7 &&
-                  piece.x + (j + 1) * directions[i][0] >= 0 &&
-                  piece.y + (j + 1) * directions[i][1] <= 7 &&
-                  piece.y + (j + 1) * directions[i][1] >= 0
-                ) {
-                  if (
-                    !pieces.find(
-                      (p) =>
-                        p.x === piece.x + (j + 1) * directions[i][0] &&
-                        p.y === piece.y + (j + 1) * directions[i][1]
-                    )
-                  ) {
-                    if (
-                      !this.isPathBlockiedByOwnPiece(
-                        piece.x,
-                        piece.y,
-                        piece.x + (j + 1) * directions[i][0],
-                        piece.y + (j + 1) * directions[i][1],
-                        plType.BLACK,
-                        pieces
-                      )
-                    ) {
-                      if (
-                        this.countEnemyPiecesInPath(
-                          piece.x,
-                          piece.y,
-                          piece.x + (j + 1) * directions[i][0],
-                          piece.y + (j + 1) * directions[i][1],
-                          plType.BLACK,
-                          pieces
-                        ) === 1
-                      ) {
-                        console.log("dama", piece);
-                      }
-                    }
-                  }
-                }
-              }
-            }
-          }
-        }
-      }
-    });
+    }
+    return firstJumpAttacks;
   }
   isValidMove(px, py, x, y, pieceType, playerType, pieces) {
     if (pieceType === pType.PAWN) {
@@ -284,4 +225,59 @@ export default class Rules {
 
     return false;
   }
+
+  updatePiecesAfterJump(pieces, jumpedPiece, beforePiece, afterPiece) {
+    let temp = pieces;
+    temp = temp.filter(
+      (piece) => !(piece.x === beforePiece.x && piece.y === beforePiece.y)
+    );
+    temp = temp.filter(
+      (piece) => !(piece.x === jumpedPiece.x && piece.y === jumpedPiece.y)
+    );
+    temp.push(afterPiece);
+    return temp;
+  }
+
+  findJumpShots(piece, pieces) {
+    let result = [];
+    if (this.pieceOneJumpAttacks(piece, pieces).length === 0) {
+      return [];
+    }
+
+    const explore = (so_far, start, pieces) => {
+      //console.log(pieces);
+      let moves = this.pieceOneJumpAttacks(start, pieces);
+      if (moves.length === 0) {
+        if (so_far.length !== 0) {
+          result.push(so_far);
+        }
+      } else {
+        for (let i = 0; i < moves.length; i++) {
+          let move = { ...start, x: moves[i][0].x, y: moves[i][0].y };
+          let newPieces = this.updatePiecesAfterJump(
+            pieces,
+            moves[i][1],
+            start,
+            move
+          );
+          console.log(so_far);
+
+          let new_so_far = [...so_far];
+
+          new_so_far.push(move);
+          explore(new_so_far, move, newPieces);
+        }
+      }
+    };
+
+    explore([], piece, pieces);
+
+    console.log(result);
+    return null;
+  }
 }
+
+/*
+pirma rasti lista kiek is esamo langelio yra kirtimu 
+
+*/
