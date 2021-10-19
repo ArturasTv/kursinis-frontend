@@ -25,8 +25,8 @@ const initialPieces = () => {
     }
   }
 
-  for (let i = 0; i < 4; i++) {
-    for (let j = 0; j < 3; j++) {
+  for (let i = 0; i < 1; i++) {
+    for (let j = 0; j < 1; j++) {
       pieces.push({
         pieceType: j !== 0 ? pType.PAWN : pType.QUEEN,
         pieceColor: pColor.WHITE,
@@ -163,7 +163,11 @@ const DraughtsBoard = () => {
 
       pieces.forEach((piece) => {
         if (rules.pieceOneJumpAttacks(piece, pieces).length !== 0) {
+          console.log(piece);
+          //console.log(rules.pieceOneJumpAttacks(piece, pieces));
           console.log(rules.findJumpShots(piece, pieces));
+
+          console.log(pieces);
         }
       });
 
