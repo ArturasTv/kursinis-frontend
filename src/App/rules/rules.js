@@ -131,8 +131,11 @@ export default class Rules {
     return count;
   }
   pieceOneJumpAttacks(piece, pieces) {
-    const firstJumpAttacks = [];
-
+    let firstJumpAttacks = [];
+    let copy1 = [];
+    let copy2 = [];
+    let manyJumps = false;
+    let forceJumps = false;
     const directions = [
       [1, 1],
       [1, -1],
@@ -259,7 +262,6 @@ export default class Rules {
                                 },
                               ]);
                             } else {
-                              console.log("nu bandom", firstJumpAttacks);
                               break;
                             }
                           }
@@ -275,24 +277,79 @@ export default class Rules {
       }
     }
 
-    //  console.log(firstJumpAttacks);
-    let count = 0;
-    for (let jj = 0; jj < firstJumpAttacks.length; jj++) {
-      // if (
-      //  this.checkIfQueenHaveStrikes(
-      //  pieces,
-      //  {
-      //    x: piece.x + j * directions[i][0],
-      //    y: piece.y + j * directions[i][1],
-      //   },
-      //   piece
-      // )*/
-      // )
-      {
-        count++;
+    let jumpedPieces = [...firstJumpAttacks];
+    jumpedPieces = jumpedPieces.map((piece) => piece[1]);
+    jumpedPieces = jumpedPieces.filter(
+      (piece, index, self) =>
+        index === self.findIndex((t) => t.x === piece.x && t.y === piece.y)
+    );
+    jumpedPieces = jumpedPieces.map((piece) => [piece, []]);
+
+    if (firstJumpAttacks.length !== 0 && jumpedPieces.length !== 0) {
+      let count = 0;
+      for (let jj = 0; jj < firstJumpAttacks.length; jj++) {
+        for (let oo = 0; oo < jumpedPieces.length; oo++) {
+          if (
+            jumpedPieces[oo][0].x == firstJumpAttacks[jj][1].x &&
+            jumpedPieces[oo][0].y == firstJumpAttacks[jj][1].y
+          ) {
+            if (
+              this.checkIfQueenHaveStrikes(pieces, jumpedPieces[oo][0], {
+                ...piece,
+                ...firstJumpAttacks[jj][0],
+              })
+            ) {
+              jumpedPieces[oo][1].push(firstJumpAttacks[jj][0]);
+            }
+          }
+        }
+      }
+      for (let ee = 0; ee < jumpedPieces.length; ee++) {
+        if (jumpedPieces[ee][1].length !== 0) {
+          copy1 = copy1.filter((item) => {
+            return (
+              item[1].x === jumpedPieces[ee][0].x &&
+              item[1].y === jumpedPieces[ee][0].y &&
+              jumpedPieces[ee][1].some((p) => {
+                return p.x === item[0].x && p.y === item[0].y;
+              })
+            );
+          });
+        }
+      }
+
+      for (let ee = 0; ee < jumpedPieces.length; ee++) {
+        if (jumpedPieces[ee][1].length !== 0) {
+          copy1.push(
+            [...firstJumpAttacks].filter((item) => {
+              return (
+                item[1].x === jumpedPieces[ee][0].x &&
+                item[1].y === jumpedPieces[ee][0].y &&
+                jumpedPieces[ee][1].some((p) => {
+                  return p.x === item[0].x && p.y === item[0].y;
+                })
+              );
+            })
+          );
+        }
+      }
+      for (let ee = 0; ee < jumpedPieces.length; ee++) {
+        if (jumpedPieces[ee][1].length === 0) {
+          copy2.push(
+            [...firstJumpAttacks].filter((item) => {
+              return (
+                item[1].x === jumpedPieces[ee][0].x &&
+                item[1].y === jumpedPieces[ee][0].y
+              );
+            })
+          );
+        }
       }
     }
 
+    if (copy1.length !== 0 || copy2.length !== 0) {
+      return [...copy1.flat(1), ...copy2.flat(1)];
+    }
     return firstJumpAttacks;
   }
   isValidMove(px, py, x, y, pieceType, playerType, pieces) {
@@ -376,7 +433,7 @@ export default class Rules {
     if (this.pieceOneJumpAttacks(piece, pieces).length === 0) {
       return [];
     }
-    console.log(this.pieceOneJumpAttacks(piece, pieces));
+    // console.log(this.pieceOneJumpAttacks(piece, pieces));
     const explore = (so_far, start, pieces) => {
       //console.log(pieces);
       let moves = this.pieceOneJumpAttacks(start, pieces);
@@ -406,7 +463,7 @@ export default class Rules {
 
     explore([], piece, pieces, {});
 
-    //console.log(result);
+    console.log(result);
     return null;
   }
 }
