@@ -134,8 +134,6 @@ export default class Rules {
     let firstJumpAttacks = [];
     let copy1 = [];
     let copy2 = [];
-    let manyJumps = false;
-    let forceJumps = false;
     const directions = [
       [1, 1],
       [1, -1],
@@ -286,7 +284,6 @@ export default class Rules {
     jumpedPieces = jumpedPieces.map((piece) => [piece, []]);
 
     if (firstJumpAttacks.length !== 0 && jumpedPieces.length !== 0) {
-      let count = 0;
       for (let jj = 0; jj < firstJumpAttacks.length; jj++) {
         for (let oo = 0; oo < jumpedPieces.length; oo++) {
           if (
@@ -304,20 +301,6 @@ export default class Rules {
           }
         }
       }
-      for (let ee = 0; ee < jumpedPieces.length; ee++) {
-        if (jumpedPieces[ee][1].length !== 0) {
-          copy1 = copy1.filter((item) => {
-            return (
-              item[1].x === jumpedPieces[ee][0].x &&
-              item[1].y === jumpedPieces[ee][0].y &&
-              jumpedPieces[ee][1].some((p) => {
-                return p.x === item[0].x && p.y === item[0].y;
-              })
-            );
-          });
-        }
-      }
-
       for (let ee = 0; ee < jumpedPieces.length; ee++) {
         if (jumpedPieces[ee][1].length !== 0) {
           copy1.push(
@@ -374,7 +357,6 @@ export default class Rules {
         }
       }
     }
-
     if (pieceType === pType.QUEEN) {
       if (playerType === plType.WHITE) {
         if (
@@ -391,7 +373,6 @@ export default class Rules {
           }
         }
       }
-
       if (playerType === plType.BLACK) {
         if (
           Math.abs(x - px) === Math.abs(y - py) &&
@@ -412,19 +393,30 @@ export default class Rules {
     return false;
   }
 
+  checkIfPieceBecomeQueen(piece) {
+    if (piece.pieceType === pType.PAWN) {
+      if (piece.playerType === plType.WHITE) {
+        if (piece.y === 7) return true;
+      }
+      if (piece.playerType === plType.BLACK) {
+        if (piece.y === 0) return true;
+      }
+    }
+    return false;
+  }
+
   updatePiecesAfterJump(pieces, jumpedPiece, beforePiece, afterPiece) {
     let temp = [...pieces];
     temp = temp.filter(
       (piece) => !(piece.x === beforePiece.x && piece.y === beforePiece.y)
     );
-
     temp = temp.map((piece) => {
       return piece.x === jumpedPiece.x && piece.y === jumpedPiece.y
         ? { ...piece, jumped: true }
         : piece;
     });
-
-    temp.push(afterPiece);
+    if (this.checkIfPieceBecomeQueen(afterPiece))
+      afterPiece.pieceType = pType.QUEEN;
     return temp;
   }
 
@@ -433,9 +425,7 @@ export default class Rules {
     if (this.pieceOneJumpAttacks(piece, pieces).length === 0) {
       return [];
     }
-    // console.log(this.pieceOneJumpAttacks(piece, pieces));
     const explore = (so_far, start, pieces) => {
-      //console.log(pieces);
       let moves = this.pieceOneJumpAttacks(start, pieces);
 
       if (moves.length === 0) {
@@ -444,14 +434,19 @@ export default class Rules {
         }
       } else {
         for (let i = 0; i < moves.length; i++) {
-          let move = { ...start, x: moves[i][0].x, y: moves[i][0].y };
+          let move = {
+            ...start,
+            x: moves[i][0].x,
+            y: moves[i][0].y,
+            jx: moves[i][1].x,
+            jy: moves[i][1].y,
+          };
           let newPieces = this.updatePiecesAfterJump(
             pieces,
             moves[i][1],
             start,
             move
           );
-          // console.log(so_far);
 
           let new_so_far = [...so_far];
 
@@ -461,14 +456,7 @@ export default class Rules {
       }
     };
 
-    explore([], piece, pieces, {});
-
-    console.log(result);
-    return null;
+    explore([], piece, pieces);
+    return result;
   }
 }
-
-/*
-pirma rasti lista kiek is esamo langelio yra kirtimu 
-ISFILTERINTI LISTA KAD BUTU TIK VIENOS RUSIES NUKIRSTOS SASKES IR TADA TIKRINTI AR NERA GALIMU MULTIPLE JUMS IR JEIGU BUS TAI TADA FILTRUOTI TIE KURIE TURI IR TIE KURIE NETURI IR VISKAS DONE BUS PAGALIAU
-*/
