@@ -1,4 +1,6 @@
-import { useRef, useState } from "react";
+import React from "react";
+import { useRef, useEffect, useState, useCallback } from "react";
+import * as useStateRef from "react-usestateref";
 import styles from "./DraughtsBoard.module.scss";
 import {
   verticalAxis,
@@ -10,50 +12,28 @@ import {
 import Tile from "../tile/Tile";
 import Rules from "../../rules/rules";
 import Game from "../../rules/game";
+import { useDispatch } from "react-redux";
+import { validateMove } from "../../redux/actions/moveAction";
+import { updatePieces } from "../../redux/actions/piecesAction";
 
-const initialPieces = () => {
-  let pieces = [];
-
-  for (let i = 0; i < 4; i++) {
-    for (let j = 0; j < 3; j++) {
-      pieces.push({
-        pieceType: pType.PAWN,
-        pieceColor: pColor.BLACK,
-        playerType: plType.BLACK,
-        x: 7 - i * 2 - (j % 2),
-        y: 7 - j,
-      });
-    }
-  }
-
-  for (let i = 0; i < 4; i++) {
-    for (let j = 0; j < 3; j++) {
-      pieces.push({
-        pieceType: pType.PAWN,
-        pieceColor: pColor.WHITE,
-        playerType: plType.WHITE,
-        x: i * 2 + (j % 2),
-        y: j,
-      });
-    }
-  }
-
-  return pieces;
-};
-
-const DraughtsBoard = () => {
+const DraughtsBoard = ({ startingPosition, orentation, turn }) => {
   const draughtsBoardRef = useRef(null);
-  const [pieces, setPieces] = useState(initialPieces());
+  const [pieces, setPieces] = useState(startingPosition);
+
   const [activePiece, setActivePiece] = useState(null);
   const [gridX, setGridX] = useState(0);
   const [gridY, setGridY] = useState(0);
-
-  const [playerTurn, setPlayerTurn] = useState(plType.WHITE);
+  const [playerTurn, setPlayerTurn] = useState(turn);
 
   const [playerChoosenPiece, setPlayerChoosenPiece] = useState(null);
+  const [playerUpdatedPiece, setPlayerUpdatedPiece] = useState(null);
   const [playerMoveHistory, setPlayerMoveHistory] = useState([]);
 
   const [piecesHistory, setPiecesHistory] = useState(null);
+
+  const [legalMove, setLegalMove] = useState(false);
+
+  const dispatch = useDispatch();
 
   const rules = new Rules();
   const game = new Game(pieces);
@@ -106,27 +86,54 @@ const DraughtsBoard = () => {
     const draughtsBoard = draughtsBoardRef.current;
     if (element.classList.value.split("_").includes("piece") && draughtsBoard) {
       const pieceSize = e.target.getBoundingClientRect().width;
-      const x = e.clientX - pieceSize / 2;
-      const y = e.clientY - pieceSize / 2;
+      const x =
+        orentation === "BLACK"
+          ? draughtsBoard.clientWidth - e.clientX - pieceSize / 2
+          : e.clientX - pieceSize / 2;
+      const y =
+        orentation === "BLACK"
+          ? draughtsBoard.clientHeight - e.clientY - pieceSize / 4
+          : e.clientY - pieceSize / 2;
 
-      const _gridX = Math.floor(
-        (e.clientX - draughtsBoard.offsetLeft) / pieceSize
-      );
-      const _gridY = Math.abs(
-        Math.ceil(
-          (e.clientY - draughtsBoard.offsetTop - draughtsBoard.clientWidth) /
-            pieceSize
-        )
-      );
+      const _gridX =
+        orentation === "BLACK"
+          ? 7 - Math.floor((e.clientX - draughtsBoard.offsetLeft) / pieceSize)
+          : Math.floor((e.clientX - draughtsBoard.offsetLeft) / pieceSize);
+      const _gridY =
+        orentation === "BLACK"
+          ? 7 -
+            Math.abs(
+              Math.ceil(
+                (e.clientY -
+                  draughtsBoard.offsetTop -
+                  draughtsBoard.clientWidth) /
+                  pieceSize
+              )
+            )
+          : Math.abs(
+              Math.ceil(
+                (e.clientY -
+                  draughtsBoard.offsetTop -
+                  draughtsBoard.clientWidth) /
+                  pieceSize
+              )
+            );
 
-      let availablePieces = game.getAvailablePieces();
+      let availablePieces = game.getAllActivePieces(playerTurn);
+
+      console.log("pirmas", availablePieces);
+
+      if (playerUpdatedPiece) {
+        availablePieces = [playerUpdatedPiece];
+      }
+
+      console.log("trecias", availablePieces);
 
       let availablePiece = availablePieces.find(
-        (piece) => (piece) =>
-          piece.x === _gridX &&
-          piece.y === _gridY &&
-          piece.playerType === playerTurn
+        (piece) => piece.x === _gridX && piece.y === _gridY
       );
+
+      console.log(availablePieces);
 
       if (!availablePiece) return;
 
@@ -142,6 +149,7 @@ const DraughtsBoard = () => {
         element.style.position = "absolute";
         element.style.left = `${x}px`;
         element.style.top = `${y}px`;
+        element.style.zIndex = "3";
 
         game.removeJumpedPieces(p);
         const possiblePieceMoves = game.getAllpossiblePieceMoves(p);
@@ -150,9 +158,12 @@ const DraughtsBoard = () => {
 
         setPieces(highlightedPieces);
 
+        console.log("pasirinktas", playerChoosenPiece);
+
         if (!playerChoosenPiece) {
           setPiecesHistory(JSON.parse(JSON.stringify(pieces)));
           setPlayerChoosenPiece(JSON.parse(JSON.stringify(p)));
+
           game.setActivePiece(p);
         }
         setActivePiece(element);
@@ -161,18 +172,34 @@ const DraughtsBoard = () => {
   };
 
   const movePiece = (e) => {
+    if (!activePiece) return;
+
     const draughtsBoard = draughtsBoardRef.current;
     if (activePiece && draughtsBoard) {
       const pieceSize = e.target.getBoundingClientRect().width;
       const minX = draughtsBoard.offsetLeft;
-      const minY = draughtsBoard.offsetTop;
+      const minY =
+        orentation === "BLACK"
+          ? draughtsBoard.offsetTop - pieceSize / 4
+          : draughtsBoard.offsetTop;
       const maxX =
         draughtsBoard.offsetLeft + draughtsBoard.clientWidth - pieceSize;
       const maxY =
-        draughtsBoard.offsetTop + draughtsBoard.clientHeight - pieceSize;
+        orentation === "BLACK"
+          ? draughtsBoard.offsetTop +
+            draughtsBoard.clientHeight -
+            pieceSize -
+            pieceSize / 4
+          : draughtsBoard.offsetTop + draughtsBoard.clientHeight - pieceSize;
 
-      const x = e.clientX - pieceSize / 2;
-      const y = e.clientY - pieceSize / 2;
+      const x =
+        orentation === "BLACK"
+          ? draughtsBoard.clientWidth - e.clientX - pieceSize / 2
+          : e.clientX - pieceSize / 2;
+      const y =
+        orentation === "BLACK"
+          ? draughtsBoard.clientHeight - e.clientY - pieceSize / 4
+          : e.clientY - pieceSize / 2;
 
       activePiece.style.position = "absolute";
 
@@ -185,7 +212,8 @@ const DraughtsBoard = () => {
   };
 
   const dropPiece = (e) => {
-    console.log("isrinktasis", playerChoosenPiece);
+    if (!activePiece) return;
+
     const availableMoves = game.getAllpossiblePieceMovesForHistory(
       playerChoosenPiece,
       piecesHistory
@@ -198,17 +226,60 @@ const DraughtsBoard = () => {
     const draughtsBoard = draughtsBoardRef.current;
     const pieceSize = e.target.getBoundingClientRect().width;
     if (activePiece && draughtsBoard) {
-      const x = Math.floor((e.clientX - draughtsBoard.offsetLeft) / pieceSize);
-      const y = Math.abs(
-        Math.ceil(
-          (e.clientY - draughtsBoard.offsetTop - draughtsBoard.clientWidth) /
-            pieceSize
-        )
-      );
+      const x =
+        orentation === "BLACK"
+          ? 7 - Math.floor((e.clientX - draughtsBoard.offsetLeft) / pieceSize)
+          : Math.floor((e.clientX - draughtsBoard.offsetLeft) / pieceSize);
+      const y =
+        orentation === "BLACK"
+          ? 7 -
+            Math.abs(
+              Math.ceil(
+                (e.clientY -
+                  draughtsBoard.offsetTop -
+                  draughtsBoard.clientWidth) /
+                  pieceSize
+              )
+            )
+          : Math.abs(
+              Math.ceil(
+                (e.clientY -
+                  draughtsBoard.offsetTop -
+                  draughtsBoard.clientWidth) /
+                  pieceSize
+              )
+            );
+
+      if (x === gridX && y === gridY) {
+        console.log("yra buve");
+        activePiece.style.position = "relative";
+        activePiece.style.removeProperty("left");
+        activePiece.style.removeProperty("top");
+        // game.cleanJumpedPieces();
+        setPieces(game.getPieces());
+        //setPlayerChoosenPiece(null);
+        setActivePiece(null);
+        return;
+      }
 
       const tempPiece = pieces.find(
         (piece) => piece.x === gridX && piece.y === gridY
       );
+      let validMove = game
+        .getAllpossiblePieceMoves(tempPiece, deepCopyPieces)
+        .find((move) => move.x === x && move.y === y);
+
+      if ((x === gridX && y === gridY) || !validMove) {
+        console.log("yra buve");
+        activePiece.style.position = "relative";
+        activePiece.style.removeProperty("left");
+        activePiece.style.removeProperty("top");
+        // game.cleanJumpedPieces();
+        setPieces(game.getPieces());
+        // setPlayerChoosenPiece(null);
+        setActivePiece(null);
+        return;
+      }
 
       setPieces((value) => {
         const pieces = value.map((piece) => {
@@ -219,6 +290,7 @@ const DraughtsBoard = () => {
             if (validMove) {
               piece.x = x;
               piece.y = y;
+              setPlayerUpdatedPiece(piece);
             } else {
               activePiece.style.position = "relative";
               activePiece.style.removeProperty("left");
@@ -253,27 +325,36 @@ const DraughtsBoard = () => {
       });
     }
 
-    for (let i = 0; i < availableMoves.length; i++) {
-      console.log("jonas", JSON.stringify([availableMoves[i]]));
-      console.log("petras", JSON.stringify(tempHistory));
+    console.log(
+      "istorija pamokanti Iurim kas cia nutinka",
+      JSON.stringify(tempHistory)
+    );
+    console.log(JSON.stringify([availableMoves].flat()));
 
+    for (let i = 0; i < availableMoves.length; i++) {
       if (
         JSON.stringify([availableMoves[i]].flat()) ===
         JSON.stringify(tempHistory)
       ) {
         setPlayerChoosenPiece(null);
-
-        setPlayerTurn(
-          playerTurn === plType.WHITE ? plType.BLACK : plType.WHITE
-        );
-        // alert("oho");
         setPlayerMoveHistory([]);
 
         game.cleanJumpedPieces();
         setPieces(game.getPieces());
+        setPlayerTurn(null);
+
+        setLegalMove(true);
       }
     }
   };
+
+  useEffect(() => {
+    if (legalMove) {
+      setLegalMove(false);
+      dispatch(validateMove());
+      dispatch(updatePieces(pieces));
+    }
+  }, [pieces]);
 
   return (
     <div
@@ -281,6 +362,7 @@ const DraughtsBoard = () => {
       onMouseMove={(e) => movePiece(e)}
       onMouseUp={(e) => dropPiece(e)}
       className={styles["draughtsboard"]}
+      style={orentation === "BLACK" ? { transform: "rotate(180deg)" } : {}}
       ref={draughtsBoardRef}
     >
       {createTiles()}

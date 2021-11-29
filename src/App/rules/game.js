@@ -1,3 +1,4 @@
+import { act } from "react-dom/test-utils";
 import { pieceType as pType, playerType as plType } from "../constants";
 import Rules from "./rules";
 export default class Game {
@@ -91,7 +92,65 @@ export default class Game {
 
     return listOfMoves;
   }
+  getAllActivePieces(playerType) {
+    let activePiecesArray = [];
+    let piecesCopy = JSON.parse(JSON.stringify(this.getPieces()));
 
+    let piecesCopy2 = piecesCopy.filter(
+      (piece) => piece.playerType === playerType
+    );
+
+    piecesCopy.forEach((piece) => {
+      let listOfMoves = [];
+
+      listOfMoves = this.rules.findJumpShots(piece, piecesCopy);
+      if (listOfMoves.length !== 0) {
+        let suitable = piecesCopy2.find(
+          (p) => p.x === piece.x && p.y === piece.y
+        );
+        if (suitable) {
+          activePiecesArray.push(suitable);
+        }
+      }
+    });
+
+    if (activePiecesArray.length === 0) {
+      piecesCopy.forEach((piece) => {
+        for (let i = 0; i < 8; i++) {
+          for (let j = 0; j < 8; j++) {
+            if (
+              this.rules.isValidMove(
+                piece.x,
+                piece.y,
+                i,
+                j,
+                piece.pieceType,
+                piece.playerType,
+                piecesCopy
+              ) &&
+              this.rules.countEnemyPiecesInPath(
+                piece.x,
+                piece.y,
+                i,
+                j,
+                piece.playerType,
+                piecesCopy
+              ) === 0
+            ) {
+              let suitable = piecesCopy2.find(
+                (p) => p.x === piece.x && p.y === piece.y
+              );
+              if (suitable) {
+                activePiecesArray.push(suitable);
+              }
+            }
+          }
+        }
+      });
+    }
+
+    return activePiecesArray;
+  }
   setActivePiece(piece) {
     this.playerActivePiece = piece;
 
