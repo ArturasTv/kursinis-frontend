@@ -1,0 +1,30 @@
+.message-box {
+  width: 400px;
+  min-height: 200px;
+  background-color: #811a25;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  border-radius: 20px;
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  margin: -100px 0 0 -200px;
+}
+.message {
+  padding: 25px;
+  color: #f1e8e5;
+  text-align: center;
+}
+.close-button {
+  background-image: url("./../../assets/icons/close_icon.svg");
+  width: 25px;
+  height: 25px;
+  background-repeat: no-repeat;
+  background-position: center;
+  background-size: 25px;
+  position: absolute;
+  top: 10px;
+  right: 10px;
+  cursor: pointer;
+}

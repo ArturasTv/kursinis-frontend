@@ -1,4 +1,4 @@
-$board-size: 800px;
+$board-size: 600px;
 $tile-size: $board-size / 8;
 $piece-size: $tile-size - 20px;
 
@@ -7,7 +7,7 @@ $piece-size: $tile-size - 20px;
   place-content: center;
   width: $tile-size;
   height: $tile-size;
-  background-color: rgb(252, 180, 180);
+  background-color: #f1e8e5;
 }
 
 .tile-black {
@@ -15,7 +15,7 @@ $piece-size: $tile-size - 20px;
   place-content: center;
   width: $tile-size;
   height: $tile-size;
-  background-color: rgb(80, 56, 56);
+  background-color: #4f352b;
 }
 
 .tile-available {

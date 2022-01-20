@@ -34,3 +34,9 @@ export const initialPieces = () => {
 
   return pieces;
 };
+
+export const secondsToTime = (seconds) => {
+  let m = parseInt(seconds / 60);
+  let s = seconds % 60;
+  return `${m > 10 ? m : "0" + m}:${s > 10 ? s : "0" + s}`;
+};

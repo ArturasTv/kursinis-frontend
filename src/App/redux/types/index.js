@@ -9,3 +9,18 @@ export const MOVE_CHECK = "MOVE_CHECK";
 export const MOVE_RESET = "MOVE_RESET";
 export const PIECES_UPDATE = "PIECES_UPDATE";
 export const PIECES_RESET = "PIECES_RESET";
+export const CLOCK_UPDATE = "CLOCK_UPDATE";
+export const SET_CLOCKS = "SET_CLOCKS";
+export const UPDATE_WHITE_TIME = "UPDATE_WHITE_TIME";
+export const UPDATE_BLACK_TIME = "UPDATE_BLACK_TIME";
+
+export const LOGIN_SUCCESS = "LOGIN_SUCCESS";
+export const LOGIN_FAIL = "LOGIN_FAIL";
+export const LOGOUT = "LOGOUT";
+export const REFRESH_TOKEN = "REFRESH_TOKEN";
+
+export const CREATE_GAME = "CREATE_GAME";
+export const DESTROY_GAME = "DESTROY_GAME";
+
+export const SET_MESSAGE = "SET_MESSAGE";
+export const CLEAR_MESSAGE = "CLEAR_MESSAGE";

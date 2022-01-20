@@ -1,11 +1,8 @@
-import axios from "axios";
-
-axios.defaults.headers.post["Content-Type"] = "application/json";
-axios.defaults.baseURL = "http://localhost:3333";
+import axiosInstance from "../api/config/axiosInstance";
 
 const Api = {
   startGame: (username) => {
-    return axios({
+    return axiosInstance({
       method: "post",
       url: "/start",
       data: {

@@ -1,0 +1,128 @@
+$nav-width: 600px;
+
+.nav {
+  a {
+    position: relative;
+    font-size: 17px;
+    margin: 15px;
+    padding-bottom: 5px;
+    color: #f1e8e5;
+    text-decoration: none;
+    font-weight: 700;
+  }
+
+  a::after {
+    position: absolute;
+    content: "";
+    width: 100%;
+    height: 2px;
+    top: 100%;
+    left: 0;
+    background: #f1e8e5;
+    transition: transform 0.5s;
+    transform: scaleX(0);
+    transform-origin: left;
+  }
+
+  a:hover::after {
+    visibility: visible;
+    -webkit-transform: scaleX(1);
+    transform: scaleX(1);
+  }
+
+  a.active::before {
+    position: absolute;
+    content: "";
+    width: 100%;
+    height: 2px;
+    top: 100%;
+    left: 0;
+    background: #ffffff;
+  }
+
+  nav {
+    position: relative;
+  }
+
+  position: absolute;
+  top: -75px;
+  left: 50%;
+  transform: translate(-50%, -25px);
+
+  height: 100px;
+  padding-top: 50px;
+  width: $nav-width;
+
+  animation-duration: 0.75s;
+  animation-iteration-count: one;
+
+  animation-name: bounceBack;
+  animation-timing-function: ease-out;
+  animation-fill-mode: forwards;
+}
+
+.nav:hover {
+  animation-name: bounce;
+  animation-timing-function: ease-in;
+  animation-fill-mode: forwards;
+}
+
+#nav:hover {
+  background-color: black;
+}
+
+@keyframes bounce {
+  0% {
+    transform: translate(-50%, -25px);
+  }
+  100% {
+    transform: translate(-50%, 50px);
+  }
+}
+
+@keyframes bounceBack {
+  0% {
+    transform: translate(-50%, 50px);
+  }
+  100% {
+    transform: translate(-50%, -25px);
+  }
+}
+
+@keyframes fadeout {
+  0% {
+    opacity: 1;
+  }
+  100% {
+    opacity: 0;
+  }
+}
+
+@keyframes fadein {
+  0% {
+    opacity: 0;
+  }
+  100% {
+    opacity: 1;
+  }
+}
+
+.meniu-button {
+  position: absolute;
+  color: #f1e8e5;
+  left: 50%;
+  transform: translate(-50%, 200%);
+}
+.meniu-button-disapear {
+  animation-duration: 0.75s;
+  animation-name: fadeout;
+  animation-timing-function: ease-in;
+  animation-fill-mode: forwards;
+}
+
+.meniu-button-apear {
+  animation-duration: 0.75s;
+  animation-name: fadein;
+  animation-timing-function: ease-in;
+  animation-fill-mode: forwards;
+}

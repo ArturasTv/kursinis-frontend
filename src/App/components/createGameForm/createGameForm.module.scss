@@ -1,0 +1,60 @@
+.createGame-form {
+  select {
+    display: block;
+    //margin-bottom: 20px;
+  }
+  select {
+    outline: 0;
+    border-width: 0 0 3px;
+    border-color: grey;
+    text-align: center;
+    margin-left: auto;
+    margin-right: auto;
+    width: 150px;
+    margin-top: 25px;
+  }
+
+  select {
+    font-size: 16px;
+    color: grey;
+  }
+  option[value=""][disabled] {
+    display: none;
+  }
+
+  .button {
+    background-color: #781341;
+    border: none;
+    color: white;
+    padding: 8px 32px;
+    text-align: center;
+    text-decoration: none;
+    font-size: 16px;
+
+    margin: 4px 2px;
+    cursor: pointer;
+    margin-top: 50px;
+  }
+  text-align: center;
+  background-color: white;
+  height: 325px;
+  width: 300px;
+  display: table-cell;
+  vertical-align: middle;
+}
+
+.error-message {
+  height: 20px;
+  color: #dc3545;
+  margin: 0;
+  padding: 0;
+  font-size: 14px;
+  display: block;
+}
+.line {
+  margin: 25px 25px;
+}
+.createGame-form-wrapper {
+  margin: 0;
+  padding: 0;
+}

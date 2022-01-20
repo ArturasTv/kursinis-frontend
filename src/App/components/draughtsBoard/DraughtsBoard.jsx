@@ -38,6 +38,11 @@ const DraughtsBoard = ({ startingPosition, orentation, turn }) => {
   const rules = new Rules();
   const game = new Game(pieces);
 
+  const getOppositeTurn = (turn) => {
+    if (turn === "BLACK") return "WHITE";
+    if (turn === "WHITE") return "BLACK";
+  };
+
   const createTiles = () => {
     let board = [];
 
@@ -78,6 +83,9 @@ const DraughtsBoard = ({ startingPosition, orentation, turn }) => {
         }
       }
     }
+
+    board = orentation === "BLACK" ? board.reverse() : board;
+
     return board;
   };
 
@@ -86,14 +94,9 @@ const DraughtsBoard = ({ startingPosition, orentation, turn }) => {
     const draughtsBoard = draughtsBoardRef.current;
     if (element.classList.value.split("_").includes("piece") && draughtsBoard) {
       const pieceSize = e.target.getBoundingClientRect().width;
-      const x =
-        orentation === "BLACK"
-          ? draughtsBoard.clientWidth - e.clientX - pieceSize / 2
-          : e.clientX - pieceSize / 2;
-      const y =
-        orentation === "BLACK"
-          ? draughtsBoard.clientHeight - e.clientY - pieceSize / 4
-          : e.clientY - pieceSize / 2;
+
+      const x = e.clientX - pieceSize / 2;
+      const y = e.clientY - pieceSize / 2;
 
       const _gridX =
         orentation === "BLACK"
@@ -121,19 +124,13 @@ const DraughtsBoard = ({ startingPosition, orentation, turn }) => {
 
       let availablePieces = game.getAllActivePieces(playerTurn);
 
-      console.log("pirmas", availablePieces);
-
       if (playerUpdatedPiece) {
         availablePieces = [playerUpdatedPiece];
       }
 
-      console.log("trecias", availablePieces);
-
       let availablePiece = availablePieces.find(
         (piece) => piece.x === _gridX && piece.y === _gridY
       );
-
-      console.log(availablePieces);
 
       if (!availablePiece) return;
 
@@ -158,9 +155,7 @@ const DraughtsBoard = ({ startingPosition, orentation, turn }) => {
 
         setPieces(highlightedPieces);
 
-        console.log("pasirinktas", playerChoosenPiece);
-
-        if (!playerChoosenPiece) {
+        if (playerMoveHistory.length === 0) {
           setPiecesHistory(JSON.parse(JSON.stringify(pieces)));
           setPlayerChoosenPiece(JSON.parse(JSON.stringify(p)));
 
@@ -192,22 +187,14 @@ const DraughtsBoard = ({ startingPosition, orentation, turn }) => {
             pieceSize / 4
           : draughtsBoard.offsetTop + draughtsBoard.clientHeight - pieceSize;
 
-      const x =
-        orentation === "BLACK"
-          ? draughtsBoard.clientWidth - e.clientX - pieceSize / 2
-          : e.clientX - pieceSize / 2;
-      const y =
-        orentation === "BLACK"
-          ? draughtsBoard.clientHeight - e.clientY - pieceSize / 4
-          : e.clientY - pieceSize / 2;
+      const x = e.clientX - pieceSize / 2;
+      const y = e.clientY - pieceSize / 2;
 
-      activePiece.style.position = "absolute";
+      activePiece.style.left = `${x}px`;
+      activePiece.style.top = `${y}px`;
 
-      activePiece.style.left =
-        x > minX && x < maxX ? `${x}px` : x < minX ? `${minX}px` : `${maxX}px`;
-
-      activePiece.style.top =
-        y > minY && y < maxY ? `${y}px` : y < minY ? `${minY}px` : `${maxY}px`;
+      //  activePiece.style.top =
+      //   y > minY && y < maxY ? `${y}px` : y < minY ? `${minY}px` : `${maxY}px`;
     }
   };
 
@@ -251,7 +238,6 @@ const DraughtsBoard = ({ startingPosition, orentation, turn }) => {
             );
 
       if (x === gridX && y === gridY) {
-        console.log("yra buve");
         activePiece.style.position = "relative";
         activePiece.style.removeProperty("left");
         activePiece.style.removeProperty("top");
@@ -270,7 +256,6 @@ const DraughtsBoard = ({ startingPosition, orentation, turn }) => {
         .find((move) => move.x === x && move.y === y);
 
       if ((x === gridX && y === gridY) || !validMove) {
-        console.log("yra buve");
         activePiece.style.position = "relative";
         activePiece.style.removeProperty("left");
         activePiece.style.removeProperty("top");
@@ -325,12 +310,6 @@ const DraughtsBoard = ({ startingPosition, orentation, turn }) => {
       });
     }
 
-    console.log(
-      "istorija pamokanti Iurim kas cia nutinka",
-      JSON.stringify(tempHistory)
-    );
-    console.log(JSON.stringify([availableMoves].flat()));
-
     for (let i = 0; i < availableMoves.length; i++) {
       if (
         JSON.stringify([availableMoves[i]].flat()) ===
@@ -351,7 +330,7 @@ const DraughtsBoard = ({ startingPosition, orentation, turn }) => {
   useEffect(() => {
     if (legalMove) {
       setLegalMove(false);
-      dispatch(validateMove());
+      dispatch(validateMove(getOppositeTurn(turn)));
       dispatch(updatePieces(pieces));
     }
   }, [pieces]);
@@ -362,7 +341,7 @@ const DraughtsBoard = ({ startingPosition, orentation, turn }) => {
       onMouseMove={(e) => movePiece(e)}
       onMouseUp={(e) => dropPiece(e)}
       className={styles["draughtsboard"]}
-      style={orentation === "BLACK" ? { transform: "rotate(180deg)" } : {}}
+      //  style={orentation === "BLACK" ? { transform: "rotate(180deg)" } : {}}
       ref={draughtsBoardRef}
     >
       {createTiles()}

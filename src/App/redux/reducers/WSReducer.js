@@ -10,6 +10,12 @@ const defaultState = {
   gameStarted: false,
   searching: false,
   start: null,
+  startedGame: null,
+  clockTicking: null,
+  whiteTime: null,
+  blackTime: null,
+  tables: null,
+  gameId: null,
 };
 
 const WSReducer = (state = defaultState, action) => {

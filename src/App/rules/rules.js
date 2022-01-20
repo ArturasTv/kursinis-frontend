@@ -46,7 +46,6 @@ export default class Rules {
         ? { ...piece, jumped: true }
         : piece;
     });
-    //console.log("temp", temp);
     if (startPiece.pieceType === pType.QUEEN) {
       for (let i = 0; i < directions.length; i++) {
         for (let j = 0; j < 8; j++) {

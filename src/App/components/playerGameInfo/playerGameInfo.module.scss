@@ -1,0 +1,18 @@
+$board-size: 600px;
+.playerGameInfo {
+  width: $board-size;
+  height: 40px;
+  background-color: #4ea5d9;
+}
+
+.name {
+  font-size: 20px;
+  display: inline-block;
+  padding: 8px;
+}
+.time {
+  font-size: 20px;
+  display: inline-block;
+  padding: 8px;
+  padding-left: 30px;
+}

@@ -1,0 +1,72 @@
+.register-form {
+  input {
+    display: block;
+    //margin-bottom: 20px;
+  }
+  input {
+    outline: 0;
+    border-width: 0 0 3px;
+    border-color: grey;
+    text-align: center;
+    margin-left: auto;
+    margin-right: auto;
+  }
+  input:focus {
+    border-color: #28a745;
+  }
+  input[type="text"] {
+    font-size: 16px;
+    color: grey;
+  }
+
+  input[type="password"] {
+    font-size: 16px;
+    color: grey;
+  }
+
+  .input-error {
+    margin-bottom: 0px;
+    border-color: #dc3545;
+  }
+
+  .error-message {
+    height: 20px;
+    color: #dc3545;
+    margin: 0;
+    padding: 0;
+    font-size: 14px;
+    display: block;
+  }
+  .button {
+    background-color: #781341;
+    border: none;
+    color: white;
+    padding: 8px 32px;
+    text-align: center;
+    text-decoration: none;
+    font-size: 16px;
+
+    margin: 4px 2px;
+    cursor: pointer;
+    margin: 10px;
+  }
+  text-align: center;
+  background-color: white;
+  height: 325px;
+  width: 300px;
+  display: table-cell;
+  vertical-align: middle;
+}
+
+.forgot-password-link {
+  display: block;
+  text-decoration: none;
+  color: blue;
+}
+.line {
+  margin: 25px 25px;
+}
+.register-form-wrapper {
+  margin: 0;
+  padding: 0;
+}

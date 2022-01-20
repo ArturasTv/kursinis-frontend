@@ -168,7 +168,6 @@ export default class Game {
   }
 
   takeShot(piece, after) {
-    //  console.log(previous, after);
     let listOfMoves = this.rules.findJumpShots(piece, this.getPieces());
 
     let jumpedPiece = listOfMoves.find(
@@ -178,25 +177,15 @@ export default class Game {
     if (jumpedPiece) {
       let firstJumpedPiece = jumpedPiece[0];
 
-      console.log(jumpedPiece);
-      console.log("pries viska", this.pieces);
       this.pieces = this.pieces.map((piece) =>
         piece.x === firstJumpedPiece.jx && piece.y === firstJumpedPiece.jy
           ? { ...piece, jumped: true }
           : piece
       );
-      console.log("po visko", this.pieces);
     }
-
-    //console.log(this.pieces);
-    // console.log(after.x);
-    //console.log("labas", listOfMoves);
   }
   removeJumpedPieces(piece) {
-    //console.log(piece);
-
     let listOfMoves = this.rules.findJumpShots(piece, this.pieces);
-    //console.log(listOfMoves);
   }
 
   cleanJumpedPieces() {
@@ -215,7 +204,6 @@ export default class Game {
   getHighlightedPieces(moves) {
     let temp = [...this.pieces];
     moves.forEach((move) => temp.push({ ...move, highlighted: true }));
-    //  console.log(temp);
     return temp;
   }
   getPieces(pieces = this.pieces) {

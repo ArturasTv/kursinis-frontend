@@ -17,6 +17,14 @@ const Tile = ({ tileColor, pieceType, pieceColor, jumped }) => {
     if (pieceType === pType.QUEEN && pieceColor === pColor.BLACK)
       return blackQueen;
   };
+
+  useEffect(() => {
+    [whitePiece, blackPiece, whiteQueen, blackQueen].forEach((piece) => {
+      const img = new Image();
+      img.src = piece;
+    });
+  }, []);
+
   return (
     <div className={styles[`tile-${tileColor}`]}>
       {pieceType && pieceColor && (
